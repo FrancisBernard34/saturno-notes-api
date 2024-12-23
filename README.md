@@ -1,3 +1,4 @@
+
 # Saturno Notes API
 
 **Saturno Notes API** é a API desenvolvida para o projeto Saturno Notes. Esta API lida com a autenticação de usuários, gerenciamento de notas e armazenamento de dados usando um banco de dados SQLite. A aplicação foi construída com o objetivo de fornecer uma interface robusta e escalável para o front-end do Saturno Notes.
@@ -42,19 +43,32 @@ Para rodar o projeto localmente, siga os seguintes passos:
    npm install
    ```
 
-4. Crie o banco de dados e realize as migrações:
+4. Crie um arquivo `.env` a partir do arquivo de exemplo `.env.example`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+5. Abra o arquivo `.env` e preencha as variáveis com as informações apropriadas:
+
+   ```env
+   AUTH_SECRET=your_secret_key
+   PORT=3001
+   ```
+
+6. Crie o banco de dados e realize as migrações:
 
    ```bash
    npm run migrate
    ```
 
-5. Execute a aplicação em modo de desenvolvimento:
+7. Execute a aplicação em modo de desenvolvimento:
 
    ```bash
    npm run dev
    ```
 
-6. A API estará disponível em [http://localhost:3001](http://localhost:3001).
+8. A API estará disponível em [http://localhost:3001](http://localhost:3001).
 
 ## Scripts
 
