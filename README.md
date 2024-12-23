@@ -1,7 +1,7 @@
 
 # Saturno Notes API
 
-**Saturno Notes API** é a API desenvolvida para o projeto Saturno Notes. Esta API lida com a autenticação de usuários, gerenciamento de notas e armazenamento de dados usando um banco de dados SQLite. A aplicação foi construída com o objetivo de fornecer uma interface robusta e escalável para o front-end do Saturno Notes.
+**Saturno Notes API** é a API desenvolvida para o projeto [Saturno Notes](https://github.com/FrancisBernard34/saturno-notes-frontend). Esta API lida com a autenticação de usuários, gerenciamento de notas e armazenamento de dados usando um banco de dados SQLite. A aplicação foi construída com o objetivo de fornecer uma interface robusta e escalável para o front-end do Saturno Notes.
 
 ## Funcionalidades
 
@@ -81,9 +81,7 @@ Para rodar o projeto localmente, siga os seguintes passos:
 
 Se você deseja contribuir para o projeto, sinta-se à vontade para abrir uma issue ou enviar um pull request. Seu feedback é muito bem-vindo!
 
-## Licença
 
-Este projeto está licenciado sob a [ISC License](LICENSE).
 
 ---
 
