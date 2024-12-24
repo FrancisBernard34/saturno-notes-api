@@ -13,7 +13,7 @@ describe("UsersController", () => {
   beforeEach(() => {
     userRepository = new UserRepositoryInMemory();
     userCreateService = new UserCreateService(userRepository);
-    usersController = new UsersController();
+    usersController = new UsersController(userRepository, userCreateService);
 
     response = {
       status: jest.fn().mockReturnThis(),

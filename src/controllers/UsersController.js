@@ -1,26 +1,18 @@
 const { hash, compare } = require("bcryptjs");
 const AppError = require("../utils/AppError");
-const sqliteConnection = require("../database/sqlite");
-
-const UserRepository = require("../repositories/UserRepository");
-const UserCreateService = require("../services/UserCreateService");
 
 class UsersController {
-  /* 
-  index - GET para listar vários registros
-  show - GET para listar um único registro
-  create - POST para criar um novo registro
-  update - PUT para atualizar um registro
-  delete - DELETE para deletar um registro
-  */
+  constructor(userRepository = null, userCreateService = null) {
+    const UserRepository = require("../repositories/UserRepository");
+    const UserCreateService = require("../services/UserCreateService");
+    
+    this.userRepository = userRepository || new UserRepository();
+    this.userCreateService = userCreateService || new UserCreateService(this.userRepository);
+  }
+
   async create(request, response) {
     const { name, email, password } = request.body;
-
-    const userRepository = new UserRepository();
-    const userCreateService = new UserCreateService(userRepository);
-
-    await userCreateService.execute({ name, email, password });
-
+    await this.userCreateService.execute({ name, email, password });
     return response.status(201).json();
   }
 
@@ -28,19 +20,13 @@ class UsersController {
     const { name, email, password, old_password } = request.body;
     const user_id = request.user.id;
 
-    const database = await sqliteConnection();
-    const user = await database.get("SELECT * FROM users WHERE id = ?", [
-      user_id,
-    ]);
+    const user = await this.userRepository.findById(user_id);
 
     if (!user) {
       throw new AppError("User not found!");
     }
 
-    const userWithUpdatedEmail = await database.get(
-      "SELECT * FROM users WHERE email = ?",
-      [email]
-    );
+    const userWithUpdatedEmail = await this.userRepository.findByEmail(email);
 
     if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
       throw new AppError("Email already in use!");
@@ -63,10 +49,7 @@ class UsersController {
       user.password = await hash(password, 8);
     }
 
-    await database.run(
-      "UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME('now') WHERE id = ?",
-      [user.name, user.email, user.password, user_id]
-    );
+    await this.userRepository.update(user);
 
     return response.json();
   }

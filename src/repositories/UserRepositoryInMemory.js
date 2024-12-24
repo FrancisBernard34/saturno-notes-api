@@ -1,21 +1,35 @@
 class UserRepositoryInMemory {
-  users = []
-
-  async create({ email, name, password}) {
-    const user = {
-      id: Math.floor(Math.random() * 1000) + 1,
-      email,
-      name,
-      password
-    };
-
-    this.users.push(user)
-
-    return user;
+  constructor() {
+    this.users = [];
+    this.id = 1;
   }
 
   async findByEmail(email) {
     return this.users.find(user => user.email === email);
+  }
+
+  async findById(id) {
+    return this.users.find(user => user.id === id);
+  }
+
+  async create({ name, email, password }) {
+    const user = {
+      id: this.id++,
+      name,
+      email,
+      password
+    };
+
+    this.users.push(user);
+    return user;
+  }
+
+  async update(user) {
+    const index = this.users.findIndex(u => u.id === user.id);
+    if (index >= 0) {
+      this.users[index] = user;
+    }
+    return user;
   }
 }
 

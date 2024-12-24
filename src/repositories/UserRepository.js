@@ -7,6 +7,12 @@ class UserRepository {
     return user;
   }
 
+  async findById(id) {
+    const database = await sqliteConnection();
+    const user = await database.get("SELECT * FROM users WHERE id = ?", [id]);
+    return user;
+  }
+
   async create({ name, email, hashedPassword }) {
     const database = await sqliteConnection();
     const userId = await database.run(
