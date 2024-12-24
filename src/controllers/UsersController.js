@@ -44,7 +44,7 @@ class UsersController {
     const user = await this.userRepository.findById(user_id);
 
     if (!user) {
-      throw new AppError("User not found!");
+      throw new AppError("User not found");
     }
 
     const userWithUpdatedEmail = await this.userRepository.findByEmail(email);
