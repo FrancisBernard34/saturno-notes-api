@@ -16,7 +16,7 @@ class UserRepository {
   async create({ name, email, hashedPassword }) {
     const database = await sqliteConnection();
     const userId = await database.run(
-      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+      "INSERT INTO users (name, email, hashedPassword) VALUES (?, ?, ?)",
       [name, email, hashedPassword]
     );
 
@@ -26,8 +26,8 @@ class UserRepository {
   async update(user) {
     const database = await sqliteConnection();
     await database.run(
-      "UPDATE users SET name = ?, email = ?, password = ?, avatar = ?, updated_at = DATETIME('now') WHERE id = ?",
-      [user.name, user.email, user.password, user.avatar, user.id]
+      "UPDATE users SET name = ?, email = ?, hashedPassword = ?, avatar = ?, updated_at = DATETIME('now') WHERE id = ?",
+      [user.name, user.email, user.hashedPassword, user.avatar, user.id]
     );
 
     return user;

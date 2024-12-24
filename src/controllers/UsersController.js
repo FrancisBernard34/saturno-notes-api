@@ -67,7 +67,7 @@ class UsersController {
         throw new AppError("Old password does not match!");
       }
 
-      user.password = await hash(password, 8);
+      user.hashedPassword = await hash(password, 8);
     }
 
     await this.userRepository.update(user);

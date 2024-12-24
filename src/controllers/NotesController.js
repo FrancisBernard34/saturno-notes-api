@@ -68,7 +68,14 @@ class NotesController {
 
     await knex("tags").insert(tagsInsert);
 
-    return response.json();
+    // return the created note without querying the database again
+    return response.status(201).json({
+      id: note_id,
+      title,
+      description,
+      tags,
+      links,
+    });
   }
 
   async show(request, response) {
