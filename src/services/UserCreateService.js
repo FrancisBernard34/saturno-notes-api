@@ -6,7 +6,7 @@ class UserCreateService {
     this.userRepository = userRepository;
   }
 
-  async execute({ name, email, password}) {
+  async execute({ name, email, password }) {
     const checkUserExists = await this.userRepository.findByEmail(email);
 
     if (checkUserExists) {
@@ -15,9 +15,13 @@ class UserCreateService {
 
     const hashedPassword = await hash(password, 8);
 
-    const userCreated = await this.userRepository.create({ name, email, password: hashedPassword });
+    const user = await this.userRepository.create({
+      name,
+      email,
+      hashedPassword
+    });
 
-    return userCreated;
+    return user;
   }
 }
 

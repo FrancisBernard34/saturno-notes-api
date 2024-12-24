@@ -1,22 +1,43 @@
 const { hash, compare } = require("bcryptjs");
 const AppError = require("../utils/AppError");
+const UserRepository = require("../repositories/UserRepository");
+const UserCreateService = require("../services/UserCreateService");
 
 class UsersController {
-  constructor(userRepository = null, userCreateService = null) {
-    const UserRepository = require("../repositories/UserRepository");
-    const UserCreateService = require("../services/UserCreateService");
-    
-    this.userRepository = userRepository || new UserRepository();
-    this.userCreateService = userCreateService || new UserCreateService(this.userRepository);
+  constructor() {
+    this.userRepository = new UserRepository();
+    this.userCreateService = new UserCreateService(this.userRepository);
   }
 
-  async create(request, response) {
-    const { name, email, password } = request.body;
-    await this.userCreateService.execute({ name, email, password });
-    return response.status(201).json();
+  create = async (request, response) => {
+    try {
+      const { name, email, password } = request.body;
+
+      if (!name || !email || !password) {
+        throw new AppError("All fields are required!");
+      }
+
+      const user = await this.userCreateService.execute({ name, email, password });
+      
+      return response.status(201).json({
+        status: "success",
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email
+          }
+        }
+      });
+    } catch (error) {
+      return response.status(error.statusCode || 500).json({
+        status: "error",
+        message: error.message || "Internal server error"
+      });
+    }
   }
 
-  async update(request, response) {
+  update = async (request, response) => {
     const { name, email, password, old_password } = request.body;
     const user_id = request.user.id;
 
