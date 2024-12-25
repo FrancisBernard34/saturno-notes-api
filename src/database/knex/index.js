@@ -1,6 +1,5 @@
-const config = require("../../../knexfile")
-const knex = require("knex")
+const path = require('path');
+const config = require(path.resolve(__dirname, '../../../knexfile'));
+const knex = require("knex")(config.development);
 
-const connection = knex(config.development);
-
-module.exports = connection;
+module.exports = knex;

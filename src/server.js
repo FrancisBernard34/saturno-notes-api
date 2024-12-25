@@ -1,7 +1,9 @@
 require("dotenv/config");
 require("express-async-errors");
 
-const migrationsRun = require("./database/sqlite/migrations");
+const path = require('path');
+const config = require(path.resolve(__dirname, '../knexfile'));
+const knex = require("knex")(config.development);
 const AppError = require("./utils/AppError");
 const uploadConfig = require("./configs/upload");
 
@@ -9,7 +11,8 @@ const cors = require("cors");
 const express = require("express");
 const routes = require("./routes");
 
-migrationsRun();
+// Run Knex migrations
+knex.migrate.latest();
 
 const app = express();
 app.use(cors());
@@ -31,7 +34,7 @@ app.use((error, request, response, next) => {
 
   return response.status(500).json({
     status: "error",
-    message: "Internal Server Error",
+    message: "Internal server error",
   });
 });
 

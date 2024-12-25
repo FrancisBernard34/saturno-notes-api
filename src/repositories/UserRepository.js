@@ -1,34 +1,41 @@
-const sqliteConnection = require("../database/sqlite");
+const knex = require("../database/knex");
 
 class UserRepository {
   async findByEmail(email) {
-    const database = await sqliteConnection();
-    const user = await database.get("SELECT * FROM users WHERE email = ?", [email]);
+    const user = await knex('users')
+      .where({ email })
+      .first();
     return user;
   }
 
   async findById(id) {
-    const database = await sqliteConnection();
-    const user = await database.get("SELECT * FROM users WHERE id = ?", [id]);
+    const user = await knex('users')
+      .where({ id })
+      .first();
     return user;
   }
 
   async create({ name, email, hashedPassword }) {
-    const database = await sqliteConnection();
-    const userId = await database.run(
-      "INSERT INTO users (name, email, hashedPassword) VALUES (?, ?, ?)",
-      [name, email, hashedPassword]
-    );
-
+    const [userId] = await knex('users')
+      .insert({
+        name, 
+        email, 
+        hashedPassword
+      })
+      .returning('id');
     return { id: userId };
   }
 
   async update(user) {
-    const database = await sqliteConnection();
-    await database.run(
-      "UPDATE users SET name = ?, email = ?, hashedPassword = ?, avatar = ?, updated_at = DATETIME('now') WHERE id = ?",
-      [user.name, user.email, user.hashedPassword, user.avatar, user.id]
-    );
+    await knex('users')
+      .where({ id: user.id })
+      .update({
+        name: user.name,
+        email: user.email,
+        hashedPassword: user.hashedPassword,
+        avatar: user.avatar,
+        updated_at: knex.fn.now()
+      });
 
     return user;
   }

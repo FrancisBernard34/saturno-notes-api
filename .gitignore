@@ -3,9 +3,3 @@ node_modules
 *.log
 .DS_Store
 ._*
-
-# Ignore database files
-**/database.db
-database.db
-src/database/database.db
-src/database/sqlite/database.db

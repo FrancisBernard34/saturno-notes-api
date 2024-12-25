@@ -12,15 +12,23 @@ class SessionsController {
       throw new AppError('E-mail é obrigatório', 400);
     }
 
+    if (!password) {
+      throw new AppError('Senha é obrigatória', 400);
+    }
+
     const user = await knex('users')
-      .where({ email: email })
+      .where({ email })
+      .select(['id', 'email', 'hashedPassword'])
       .first();
 
     if (!user) {
       throw new AppError('E-mail e/ou senha incorretos', 401);
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
+    const passwordMatch = await bcrypt.compare(
+      password, 
+      user.hashedPassword
+    );
 
     if(!passwordMatch) {
       throw new AppError('E-mail e/ou senha incorretos', 401);
@@ -30,9 +38,9 @@ class SessionsController {
     const token = sign({}, secret, {
       subject: String(user.id),
       expiresIn
-    })
+    });
 
-    return response.json({user, token});
+    return response.json({ user, token });
   }
 }
 
