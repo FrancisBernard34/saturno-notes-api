@@ -18,7 +18,6 @@ class SessionsController {
 
     const user = await knex('users')
       .where({ email })
-      .select(['id', 'email', 'hashedPassword'])
       .first();
 
     if (!user) {
@@ -40,7 +39,13 @@ class SessionsController {
       expiresIn
     });
 
-    return response.json({ user, token });
+    // Remove hashedPassword from the returned user object
+    const { hashedPassword, ...userWithoutPassword } = user;
+
+    return response.json({ 
+      user: userWithoutPassword, 
+      token 
+    });
   }
 }
 
