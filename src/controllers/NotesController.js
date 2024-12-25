@@ -1,9 +1,9 @@
 const knex = require("../database/knex");
+const AppError = require("../utils/AppError");
 
 class NotesController {
   async index(request, response) {
     const { title, tags } = request.query;
-
     const user_id = request.user.id;
 
     let notes;
@@ -40,42 +40,59 @@ class NotesController {
   }
 
   async create(request, response) {
-    const { title, description, tags, links } = request.body;
-    const user_id = request.user.id;
+    try {
+      const { title, description, tags = [], links = [] } = request.body;
+      const user_id = request.user.id;
 
-    const [note_id] = await knex("notes").insert({
-      title,
-      description,
-      user_id,
-    });
+      if (!title) {
+        throw new AppError("O título é obrigatório", 400);
+      }
 
-    const linksInsert = links.map((link) => {
-      return {
-        note_id,
-        url: link,
-      };
-    });
+      const [note_id] = await knex("notes")
+        .insert({
+          title,
+          description,
+          user_id,
+        })
+        .returning('id');
 
-    await knex("links").insert(linksInsert);
+      if (links.length > 0) {
+        const linksInsert = links.map((link) => {
+          return {
+            note_id,
+            url: link,
+          };
+        });
 
-    const tagsInsert = tags.map((name) => {
-      return {
-        note_id,
-        name,
-        user_id,
-      };
-    });
+        await knex("links").insert(linksInsert);
+      }
 
-    await knex("tags").insert(tagsInsert);
+      if (tags.length > 0) {
+        const tagsInsert = tags.map((name) => {
+          return {
+            note_id,
+            name,
+            user_id,
+          };
+        });
 
-    // return the created note without querying the database again
-    return response.status(201).json({
-      id: note_id,
-      title,
-      description,
-      tags,
-      links,
-    });
+        await knex("tags").insert(tagsInsert);
+      }
+
+      return response.status(201).json({
+        id: note_id,
+        title,
+        description,
+        tags,
+        links,
+      });
+    } catch (error) {
+      console.error("Error creating note:", error);
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError("Erro ao criar nota", 500);
+    }
   }
 
   async show(request, response) {
@@ -85,10 +102,7 @@ class NotesController {
     const note = await knex("notes").where({ id, user_id }).first();
 
     if (!note) {
-      return response.status(404).json({
-        status: "error",
-        message: "Note not found or unauthorized access"
-      });
+      throw new AppError("Nota não encontrada", 404);
     }
 
     const tags = await knex("tags").where({ note_id: id }).orderBy("name");
@@ -105,14 +119,15 @@ class NotesController {
 
   async delete(request, response) {
     const { id } = request.params;
+    const user_id = request.user.id;
 
-    const note = await knex("notes").where({ id });
+    const note = await knex("notes").where({ id, user_id }).first();
 
-    if (note.length > 0) {
-      await knex("notes").where({ id }).delete();
-    } else {
-      return response.status(400).json({ error: "User doesn't have notes." });
+    if (!note) {
+      throw new AppError("Nota não encontrada", 404);
     }
+
+    await knex("notes").where({ id, user_id }).delete();
 
     return response.json();
   }
