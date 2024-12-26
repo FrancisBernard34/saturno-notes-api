@@ -48,14 +48,18 @@ class NotesController {
         throw new AppError("O título é obrigatório", 400);
       }
 
-      const [note_id] = await knex("notes")
+      // First insert the note
+      const [insertedNote] = await knex("notes")
         .insert({
           title,
           description,
           user_id,
         })
-        .returning('id');
+        .returning('*');
 
+      const note_id = insertedNote.id;
+
+      // Insert links if any
       if (links.length > 0) {
         const linksInsert = links.map((link) => {
           return {
@@ -67,6 +71,7 @@ class NotesController {
         await knex("links").insert(linksInsert);
       }
 
+      // Insert tags if any
       if (tags.length > 0) {
         const tagsInsert = tags.map((name) => {
           return {
@@ -91,43 +96,28 @@ class NotesController {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError("Erro ao criar nota", 500);
+      throw new AppError("Erro ao criar a nota", 500);
     }
   }
 
   async show(request, response) {
     const { id } = request.params;
-    const user_id = request.user.id;
 
-    const note = await knex("notes").where({ id, user_id }).first();
-
-    if (!note) {
-      throw new AppError("Nota não encontrada", 404);
-    }
-
+    const note = await knex("notes").where({ id }).first();
     const tags = await knex("tags").where({ note_id: id }).orderBy("name");
-    const links = await knex("links")
-      .where({ note_id: id })
-      .orderBy("created_at");
+    const links = await knex("links").where({ note_id: id }).orderBy("created_at");
 
     return response.json({
       ...note,
       tags,
-      links,
+      links
     });
   }
 
   async delete(request, response) {
     const { id } = request.params;
-    const user_id = request.user.id;
 
-    const note = await knex("notes").where({ id, user_id }).first();
-
-    if (!note) {
-      throw new AppError("Nota não encontrada", 404);
-    }
-
-    await knex("notes").where({ id, user_id }).delete();
+    await knex("notes").where({ id }).delete();
 
     return response.json();
   }
